@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import registerBackground from "/images/other/pokemon-wallpaper.jpg";
+import { useUserContext } from "../context/UserContext";
 
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -10,22 +11,15 @@ const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { register } = useUserContext();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validazione dei campi
-    if (!username || !email || !password) {
-      setError("Tutti i campi sono obbligatori!");
-      return;
-    }
-
     try {
-      // Simula registrazione
-      console.log("Registrato con:", username, email, password);
-      navigate("/login");
-    } catch (error) {
-      setError("Errore durante la registrazione. Riprova.");
+      await register(username, email, password);
+      navigate("/login"); // Reindirizza a login in caso di successo
+    } catch (err: any) {
+      setError(err.message); // Mostra messaggio di errore specifico
     }
   };
 

@@ -40,10 +40,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
       });
-    } catch (error) {
-      throw new Error("Errore durante la registrazione");
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        const errorMessage = error.response.data;
+        if (errorMessage.includes("Username")) {
+          throw new Error("Il nome utente è già in uso. Scegline un altro.");
+        }
+        if (errorMessage.includes("Email")) {
+          throw new Error("L'indirizzo email è già registrato.");
+        }
+      }
+      throw new Error("Si è verificato un errore imprevisto durante la registrazione.");
     }
-  };
+  };  
+  
 
   const logout = () => {
     setUser(null);

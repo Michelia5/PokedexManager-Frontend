@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle} from "./ui/navigation-menu";
 import { Avatar, AvatarImage} from "./ui/avatar";
@@ -6,16 +6,19 @@ import {DropdownMenu,DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent}
 import logo from "/images/other/sfondo.jpg";
 import { useUserContext } from "../context/UserContext";
 import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "./ui/dialog";
 
 const Header: React.FC = () => {
   const { user, logout } = useUserContext();
   const navigate = useNavigate();
+  const [isLogoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/"); // Torna alla home dopo il logout
+    setLogoutDialogOpen(false); // Chiudi il dialog
   };
-
+  
   return (
     <header className="bg-white shadow-md ">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
@@ -64,19 +67,48 @@ const Header: React.FC = () => {
         {/* Avatar con Dropdown Menu */}
         <div className="flex items-center space-x-4">
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="Avatar" />
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Link to="/profile">Profilo</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Avatar>
+                    <AvatarImage src="https://github.com/shadcn.png" alt="Avatar" />
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Link to="/profile">Profilo</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setLogoutDialogOpen(true)}
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {/* Dialog di conferma */}
+              <Dialog open={isLogoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Conferma Logout</DialogTitle>
+                  </DialogHeader>
+                  <p>Sei sicuro di voler uscire?</p>
+                  <DialogFooter>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setLogoutDialogOpen(false)}
+                    >
+                      Annulla
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </>
           ) : (
             <>
               <Link to="/login">

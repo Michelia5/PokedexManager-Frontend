@@ -25,8 +25,8 @@ const EvolutionsCard: React.FC<EvolutionsCardProps> = ({ evolutions }) => (
                                     {index === 0
                                         ? "Pokémon Base"
                                         : index === 1
-                                        ? "Prima Evoluzione"
-                                        : `Evoluzione ${index + 1}`}
+                                        ? "2° Evoluzione"
+                                        : `${index +1}° Evoluzione`}
                                 </p>
                                 <img
                                     src={`/images/small/${String(evolution.id).padStart(3, "0")}.png`}

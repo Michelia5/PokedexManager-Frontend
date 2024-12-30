@@ -9,7 +9,9 @@ import StatsCard from "../components/StatsCard";
 import EvolutionsCard from "../components/EvolutionsCard";
 import Header from "../components/Header";
 import BackgroundImage from "/images/other/sfondo.jpg";
-import {Button} from "../components/ui/button";
+import { Button } from "../components/ui/button";
+import { motion } from "framer-motion";
+
 
 interface Pokemon {
     nationalNumber: number;
@@ -70,112 +72,159 @@ const getTypeColor = (type: string): string => {
     return colors[type] || "#A8A878";
 };
 
+
 const PokemonDetail: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
-    const [pokemon, setPokemon] = useState<Pokemon | null>(null);
-    const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchPokemonDetails = async () => {
-            try {
-                const response = await fetch(`http://localhost:7000/pokemon/${id}`);
-                if (!response.ok) throw new Error("Errore nel caricamento del Pokémon.");
-                const data = await response.json();
-                setPokemon(data);
-            } catch (err) {
-                setError((err as Error).message);
-            }
-        };
-        fetchPokemonDetails();
-    }, [id]);
-
-    if (error) return <p className="text-red-500">{error}</p>;
-    if (!pokemon) return <p>Caricamento...</p>;
-
-    const handleNavigation = (direction: "prev" | "next") => {
-        const newId = direction === "prev" ? pokemon.nationalNumber - 1 : pokemon.nationalNumber + 1;
-        navigate(`/pokemon/${newId}`);
+  useEffect(() => {
+    const fetchPokemonDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:7000/pokemon/${id}`);
+        if (!response.ok) throw new Error("Errore nel caricamento del Pokémon.");
+        const data = await response.json();
+        setPokemon(data);
+      } catch (err) {
+        setError((err as Error).message);
+      }
     };
+    fetchPokemonDetails();
+  }, [id]);
 
-    return (
-        <>
-            <Header />
-            <div
-                style={{
-                    backgroundImage: `url(${BackgroundImage})`,
-                    backgroundRepeat: "repeat",
-                    backgroundSize: "auto",
-                    backgroundColor: "#f8f9fa",
-                    minHeight: "100vh",
-                    paddingTop: "20px",
-                }}
+  if (error) return <p className="text-red-500">{error}</p>;
+  if (!pokemon) return <p>Caricamento...</p>;
+
+  const handleNavigation = (direction: "prev" | "next") => {
+    const newId = direction === "prev" ? pokemon.nationalNumber - 1 : pokemon.nationalNumber + 1;
+    navigate(`/pokemon/${newId}`);
+  };
+
+  return (
+    <>
+      <Header />
+      <div
+        style={{
+          backgroundImage: `url(${BackgroundImage})`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "auto",
+          backgroundColor: "#f8f9fa",
+          minHeight: "100vh",
+          paddingTop: "20px",
+        }}
+      >
+        <div className="pokemon-details max-w-4xl mx-auto p-4 space-y-8 text-center mt-4">
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <HeaderSection
+              englishName={pokemon.englishName}
+              nationalNumber={pokemon.nationalNumber}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <Button
+              className="bg-green-500 hover:bg-green-600"
+              onClick={() => navigate("/pokemon")}
             >
-                <div className="pokemon-details max-w-4xl mx-auto p-4 space-y-8 text-center mt-4">
-                    <HeaderSection
-                        englishName={pokemon.englishName}
-                        nationalNumber={pokemon.nationalNumber}
-                    />
-                    <Button
-                        className="bg-green-500 hover:bg-green-600"
-                        onClick={() => navigate('/pokemon')}
-                    >
-                        Torna alla Lista Pokémon
-                    </Button>
-
-                    <NavigationButtons
-                        onNavigate={handleNavigation}
-                        onAddToCollection={() => alert("Aggiunto alla collezione!")}
-                        onAddToWishlist={() => alert("Aggiunto alla lista desideri!")}
-                        nationalNumber={pokemon.nationalNumber}
-                    />
-                    <DescriptionCard description={pokemon.description} />
-                    <BasicInfoCard
-                        primaryType={pokemon.primaryType}
-                        secondaryType={pokemon.secondaryType}
-                        heightM={pokemon.heightM}
-                        weightKg={pokemon.weightKg}
-                        percentMale={pokemon.percentMale}
-                        percentFemale={pokemon.percentFemale}
-                        classification={pokemon.classification}
-                        captureRate={pokemon.captureRate}
-                        rarity={
-                            pokemon.isMythical
-                                ? "Mitico"
-                                : pokemon.isLegendary
-                                ? "Leggendario"
-                                : "Normale"
-                        }
-                        getTypeColor={getTypeColor}
-                    />
-
-                    <AbilitiesCard
-                        abilities0={pokemon.abilities0}
-                        abilities1={pokemon.abilities1}
-                        abilitiesSpecial={pokemon.abilitiesSpecial}
-                    />
-                    <StatsCard
-                        stats={[
-                            { label: "HP", value: pokemon.hp },
-                            { label: "Attacco", value: pokemon.attack },
-                            { label: "Difesa", value: pokemon.defense },
-                            { label: "Velocità", value: pokemon.speed },
-                        ]}
-                    />
-                    <EvolutionsCard
-                        evolutions={[
-                            { id: pokemon.evo1Id, name: pokemon.evochain0 },
-                            { id: pokemon.evo2Id, name: pokemon.evochain2 },
-                            { id: pokemon.evo3Id, name: pokemon.evochain4 },
-                            { id: pokemon.evo4Id, name: pokemon.evochain6 },
-                            { id: pokemon.evo5Id, name: pokemon.evochain8 },
-                            { id: pokemon.evo6Id, name: pokemon.evochain10 },
-                        ]}
-                    />
-                </div>
-            </div>
-        </>
-    );
+              Torna alla Lista Pokémon
+            </Button>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          >
+            <NavigationButtons
+              onNavigate={handleNavigation}
+              onAddToCollection={() => alert("Aggiunto alla collezione!")}
+              onAddToWishlist={() => alert("Aggiunto alla lista desideri!")}
+              nationalNumber={pokemon.nationalNumber}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+          >
+            <DescriptionCard description={pokemon.description} />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <BasicInfoCard
+              primaryType={pokemon.primaryType}
+              secondaryType={pokemon.secondaryType}
+              heightM={pokemon.heightM}
+              weightKg={pokemon.weightKg}
+              percentMale={pokemon.percentMale}
+              percentFemale={pokemon.percentFemale}
+              classification={pokemon.classification}
+              captureRate={pokemon.captureRate}
+              rarity={
+                pokemon.isMythical
+                  ? "Mitico"
+                  : pokemon.isLegendary
+                  ? "Leggendario"
+                  : "Normale"
+              }
+              getTypeColor={getTypeColor}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 1, duration: 0.6 }}
+          >
+            <AbilitiesCard
+              abilities0={pokemon.abilities0}
+              abilities1={pokemon.abilities1}
+              abilitiesSpecial={pokemon.abilitiesSpecial}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+          >
+            <StatsCard
+              stats={[
+                { label: "HP", value: pokemon.hp },
+                { label: "Attacco", value: pokemon.attack },
+                { label: "Difesa", value: pokemon.defense },
+                { label: "Velocità", value: pokemon.speed },
+              ]}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4, duration: 0.6 }}
+          >
+            <EvolutionsCard
+              evolutions={[
+                { id: pokemon.evo1Id, name: pokemon.evochain0 },
+                { id: pokemon.evo2Id, name: pokemon.evochain2 },
+                { id: pokemon.evo3Id, name: pokemon.evochain4 },
+                { id: pokemon.evo4Id, name: pokemon.evochain6 },
+                { id: pokemon.evo5Id, name: pokemon.evochain8 },
+                { id: pokemon.evo6Id, name: pokemon.evochain10 },
+              ]}
+            />
+          </motion.div>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default PokemonDetail;

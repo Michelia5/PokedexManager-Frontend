@@ -10,7 +10,10 @@ import EvolutionsCard from "../components/EvolutionsCard";
 import Header from "../components/Header";
 import BackgroundImage from "/images/other/sfondo.jpg";
 import { Button } from "../components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useUserContext } from "../context/UserContext";
+import axios from "axios";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 
 
 interface Pokemon {
@@ -76,8 +79,10 @@ const getTypeColor = (type: string): string => {
 const PokemonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useUserContext();
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPokemonDetails = async () => {
@@ -93,10 +98,59 @@ const PokemonDetail: React.FC = () => {
     fetchPokemonDetails();
   }, [id]);
 
-  if (error) return <p className="text-red-500">{error}</p>;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setError(null);
+      setConfirmation(null);
+    }, error ? 8000 : confirmation ? 4000 : 0);
+  
+    return () => clearTimeout(timer);
+  }, [error, confirmation]);  
+
   if (!pokemon) return <p>Caricamento...</p>;
 
+  const addToCollection = async (pokemonId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Devi effettuare il login per aggiungere Pokémon alla collezione.");
+        return;
+      }
+      await axios.post("http://localhost:7000/collections",
+        { pokemonId, status: "owned" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setConfirmation("Pokémon aggiunto con successo alla Collezione.");
+    } catch (err: any) {
+      const errorMessage = err.response?.data || "Errore durante l'aggiunta.";
+      if (err.response?.status === 400 && errorMessage.includes("già presente")) {
+        setError("Questo Pokémon è già nella tua collezione!");
+      } else {
+        setError(errorMessage);
+      }
+    }
+        
+  };
+
+  const addToWishlist = async (pokemonId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Devi effettuare il login per aggiungere Pokémon alla wishlist.");
+        return;
+      }
+      await axios.post("http://localhost:7000/collections",
+        { pokemonId, status: "wishlist" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setConfirmation("Pokémon aggiunto con successo alla Wishlist.");
+    } catch (err: any) {
+      setError(err.response?.data || "Errore durante l'aggiunta alla wishlist.");
+    }
+  };
+
   const handleNavigation = (direction: "prev" | "next") => {
+    if (!pokemon) return;
     const newId = direction === "prev" ? pokemon.nationalNumber - 1 : pokemon.nationalNumber + 1;
     navigate(`/pokemon/${newId}`);
   };
@@ -104,6 +158,7 @@ const PokemonDetail: React.FC = () => {
   return (
     <>
       <Header />
+      
       <div
         style={{
           backgroundImage: `url(${BackgroundImage})`,
@@ -142,12 +197,55 @@ const PokemonDetail: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            <NavigationButtons
-              onNavigate={handleNavigation}
-              onAddToCollection={() => alert("Aggiunto alla collezione!")}
-              onAddToWishlist={() => alert("Aggiunto alla lista desideri!")}
-              nationalNumber={pokemon.nationalNumber}
-            />
+            
+            <div>
+              <NavigationButtons
+                onNavigate={handleNavigation}
+                onAddToCollection={() => addToCollection(pokemon.nationalNumber)}
+                onAddToWishlist={() => addToWishlist(pokemon.nationalNumber)}
+                nationalNumber={pokemon.nationalNumber}
+              />
+            </div>
+
+            {/* Alert di conferma e di errore */}
+            <AnimatePresence>
+              {confirmation && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Alert
+                    variant="default"
+                    className="mx-auto max-w-md my-4 bg-green-500 text-lg"
+                  >
+                    <AlertTitle>Successo</AlertTitle>
+                    <AlertDescription>{confirmation}</AlertDescription>
+                  </Alert>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Alert
+                    variant="destructive"
+                    className="mx-auto max-w-md my-4 bg-red-600 text-white text-lg"
+                  >
+                    <AlertTitle>Errore</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: -50 }}

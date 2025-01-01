@@ -68,6 +68,15 @@ const RegisterPage: React.FC = () => {
             Accedi
           </span>
         </p>
+        <p className="mt-4">
+          Torna alla{" "}
+          <span
+            className="text-blue-500 hover:underline cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            Home
+          </span>
+        </p>
       </form>
     </div>
   );

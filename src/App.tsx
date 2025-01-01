@@ -10,11 +10,9 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import CollectionPage from './pages/CollectionPage'
 
-import { UserProvider  } from "./context/UserContext";
-
 function App() {
   return (
-    <UserProvider >
+    
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/pokemon" element={<PokemonListPage />} />
@@ -27,7 +25,6 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/collection" element={<CollectionPage />} />
       </Routes>
-    </UserProvider >  
   )
 }
 

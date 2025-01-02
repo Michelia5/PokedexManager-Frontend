@@ -75,9 +75,6 @@ const Header: React.FC = () => {
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Link to="/profile">Profilo</Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setLogoutDialogOpen(true)}
                   >

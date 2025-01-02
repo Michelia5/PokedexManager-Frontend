@@ -56,9 +56,10 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
       >
         <img
           src={imageUrl}
-          alt={englishName}
-          className="mx-auto mb-2 rounded-full p-2"
+          alt={`${englishName} sprite`}
+          className="max-w-[200px] max-h-[200px] object-contain"
         />
+
         <p className="text-lg font-bold drop-shadow-lg">
           #{nationalNumber} - {englishName}
         </p>
